@@ -1,18 +1,10 @@
 <template>
   <div>
     <!-- 按钮 -->
-    <el-button type="primary" icon="el-icon-plus" @click="visible = true"
-      >添加</el-button
-    >
+    <el-button type="primary" icon="el-icon-plus" @click="add">添加</el-button>
     <!-- 表格 -->
-    <el-table :data="trademark" border style="width: 100%">
-      <el-table-column
-        prop="id"
-        label="序号"
-        width="120"
-        align="center"
-        type="index"
-      >
+    <el-table :data="trademark" border style="width: 100%" v-loading="loading">
+      <el-table-column prop="id" label="序号" width="120" align="center" type="index">
       </el-table-column>
       <el-table-column prop="tmName" label="品牌名称"> </el-table-column>
       <el-table-column prop="" label="品牌LOGO">
@@ -21,8 +13,8 @@
         </template>
       </el-table-column>
       <el-table-column label="操作">
-        <template>
-          <el-button type="warning" icon="el-icon-edit"> 修改 </el-button>
+        <template v-slot="{ row }">
+          <el-button type="warning" icon="el-icon-edit" @click="updata(row)"> 修改 </el-button>
           <el-button type="danger" icon="el-icon-delete"> 删除 </el-button>
         </template>
       </el-table-column>
@@ -40,14 +32,13 @@
     </el-pagination>
 
     <!-- 弹出层 -->
-    <el-dialog title="添加品牌" :visible.sync="visible" width="50%">
+    <el-dialog
+      :title="trademarkForm.id ? '修改品牌' : '添加品牌'"
+      :visible.sync="visible"
+      width="50%"
+    >
       <!-- 表单 -->
-      <el-form
-        :model="trademarkForm"
-        ref="trademarkForm"
-        label-width="100px"
-        :rules="rules"
-      >
+      <el-form :model="trademarkForm" ref="trademarkForm" label-width="100px" :rules="rules">
         <el-form-item label="商品名称" prop="tmName">
           <el-input v-model="trademarkForm.tmName"></el-input>
         </el-form-item>
@@ -60,11 +51,7 @@
             :on-success="handleAvatarSuccess"
             :before-upload="beforeAvatarUpload"
           >
-            <img
-              v-if="trademarkForm.logoUrl"
-              :src="trademarkForm.logoUrl"
-              class="avatar"
-            />
+            <img v-if="trademarkForm.logoUrl" :src="trademarkForm.logoUrl" class="avatar" />
             <i v-else class="el-icon-plus avatar-uploader-icon"></i>
           </el-upload>
           <span>只能上传jpg/png,大小不超过2mb</span>
@@ -72,9 +59,7 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="visible = false">取 消</el-button>
-        <el-button type="primary" @click="submitForm('trademarkForm')"
-          >确 定</el-button
-        >
+        <el-button type="primary" @click="submitForm('trademarkForm')">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -89,17 +74,12 @@ export default {
       limit: 3, //选择单页展示的数量
       total: 0,
       visible: false,
+      loading: false,
       trademarkForm: {
         tmName: "",
         logoUrl: "",
       },
-      trademark: [
-        {
-          date: "2016-05-02",
-          name: "王小虎",
-          address: "上海市普陀区金沙江路 1518 弄",
-        },
-      ],
+      trademark: [],
       rules: {
         tmName: [
           {
@@ -119,17 +99,19 @@ export default {
   },
   methods: {
     async getList(page, limit) {
+      this.loading = true;
       const res = await this.$API.trademark.getPageList(page, limit);
+
       if (res.code === 200) {
         const { current, size, total, records } = res.data;
         this.trademark = records;
         this.size = size;
         this.pages = current;
         this.total = total;
-        this.$message.success("数据加载成功了呢~");
       } else {
         this.$message.error("获取数据失败~");
       }
+      this.loading = false;
     },
     // 上传成功触发
     handleAvatarSuccess(res) {
@@ -149,14 +131,31 @@ export default {
       }
       return isValidType && isLt;
     },
+    // 上传表单
     submitForm(form) {
       this.$refs[form].validate(async (valid) => {
         if (valid) {
-          const res = await this.$API.trademark.addTrademark(
-            this.trademarkForm
-          );
+          const { trademarkForm } = this;
+          //如果是修改 则trademark会有id
+          const isUpdata = !!trademarkForm.id;
+
+          if (isUpdata) {
+            const tm = this.trademark.find((tm) => tm.id === trademarkForm.id);
+            //输入修改的内容 不修改就返回
+            if (tm.tmName === trademarkForm.tmName && tm.logoUrl === trademarkForm.logoUrl) {
+              this.$message.warning("请输入修改内容");
+              return;
+            }
+          }
+          let res;
+          if (isUpdata) {
+            res = await this.$API.trademark.updataTrademark(trademarkForm);
+          } else {
+            res = await this.$API.trademark.addTrademark(trademarkForm);
+          }
+
           if (res.code === 200) {
-            this.$message.success("品牌添加成功了呢~");
+            this.$message.success(`${isUpdata ? "修改" : "添加"}品牌成功了呢~`);
             this.visible = false;
             this.getList(this.pages, this.limit);
           } else {
@@ -164,6 +163,20 @@ export default {
           }
         }
       });
+    },
+    //修改按钮
+    updata(row) {
+      this.$refs.trademarkForm && this.$refs.trademarkForm.clearValidate();
+      this.visible = true;
+      this.trademarkForm = { ...row };
+    },
+    //添加功能
+    add() {
+      this.visible = true;
+      this.trademarkForm = {
+        tmName: "",
+        logoUrl: "",
+      };
     },
   },
   mounted() {

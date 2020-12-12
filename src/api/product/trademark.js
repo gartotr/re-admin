@@ -12,10 +12,19 @@ export default {
       method: "GET"
     });
   },
+  //添加
   addTrademark(data) {
     return request({
       method: "POST",
       url: `${api_name}/save`,
+      data
+    });
+  },
+  // 修改
+  updataTrademark(data) {
+    return request({
+      method: "PUT",
+      url: `${api_name}/update`,
       data
     });
   }
