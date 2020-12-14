@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Category @change="getAttrList" :disabled="!isShowList" @clearList="clearList"></Category>
+    <Category :disabled="!isShowList"></Category>
     <el-card style="margin-top: 20px" v-show="isShowList">
       <el-button type="primary" icon="el-icon-plus" @click="add" :disabled="!category.category3Id"
         >添加属性</el-button
@@ -170,6 +170,10 @@ export default {
         this.$message.error(res.message);
       }
     },
+  },
+  mounted() {
+    this.$bus.$on("change", this.getAttrList);
+    this.$bus.$on("clearList", this.clearList);
   },
   components: {
     Category,
