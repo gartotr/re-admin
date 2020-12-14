@@ -1,8 +1,10 @@
 <template>
   <div>
-    <Category @change="getAttrList" :disabled="!isShowList"></Category>
+    <Category @change="getAttrList" :disabled="!isShowList" @clearList="clearList"></Category>
     <el-card style="margin-top: 20px" v-show="isShowList">
-      <el-button type="primary" icon="el-icon-plus" @click="showAttr">添加属性</el-button>
+      <el-button type="primary" icon="el-icon-plus" @click="add" :disabled="!category.category3Id"
+        >添加属性</el-button
+      >
       <el-table :data="attrList" border style="width: 100%; margin-top: 20px">
         <el-table-column label="序号" width="100" align="center" type="index"> </el-table-column>
         <el-table-column prop="attrName" label="属性名称" width="150"> </el-table-column>
@@ -36,7 +38,9 @@
           <el-input v-model="attr.attrName"></el-input>
         </el-form-item>
       </el-form>
-      <el-button type="primary" icon="el-icon-plus" @click="addAttrValue">添加属性值</el-button>
+      <el-button type="primary" icon="el-icon-plus" @click="addAttrValue" :disabled="!attr.attrName"
+        >添加属性值</el-button
+      >
       <el-table :data="attr.attrValueList" border style="width: 100%; margin: 20px">
         <el-table-column label="序号" width="100" align="center" type="index"> </el-table-column>
         <el-table-column label="属性值名称">
@@ -78,7 +82,7 @@
 </template>
 
 <script>
-import Category from "./category";
+import Category from "@/components/Category";
 
 export default {
   name: "AttrList",
@@ -98,6 +102,10 @@ export default {
     };
   },
   methods: {
+    clearList() {
+      this.attrList = [];
+      this.category.category3Id = "";
+    },
     async getAttrList(category) {
       this.category = category;
 
@@ -108,9 +116,11 @@ export default {
         this.$message.error(res.message);
       }
     },
-    showAttr() {
-      console.log(222);
-      this.category.category3Id;
+    add() {
+      this.isShowList = false;
+      this.attr.attrName = "";
+      this.attr.attrValueList = [];
+      this.attr.id = "";
     },
     updata(attr) {
       this.attr = JSON.parse(JSON.stringify(attr));
@@ -143,7 +153,15 @@ export default {
     },
     //保存上传数据
     async save() {
-      const result = await this.$API.attrs.saveAttrInfo(this.attr);
+      const isAdd = !this.attr.id;
+      const data = this.attr;
+
+      if (isAdd) {
+        data.categoryId = this.category.category3Id;
+        data.categoryLevel = 3;
+      }
+
+      const result = await this.$API.attrs.saveAttrInfo(data);
       if (result.code === 200) {
         this.$message.success("更新数据成功");
         this.getAttrList(this.category);

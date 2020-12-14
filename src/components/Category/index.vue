@@ -81,6 +81,7 @@ export default {
       } else {
         this.$message.error(res.message);
       }
+      this.$emit("clearList");
     },
     // 获取三级分类
     async handleSelectChange2(category2Id) {
@@ -92,6 +93,7 @@ export default {
       } else {
         this.$message.error(res.message);
       }
+      this.$emit("clearList");
     },
     //获取所有
     async handleSelectChange3(category3Id) {
