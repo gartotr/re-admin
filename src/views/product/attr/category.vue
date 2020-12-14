@@ -7,6 +7,7 @@
             v-model="category.category1Id"
             placeholder="请选择"
             @change="handleSelectChange1"
+            :disabled="disabled"
           >
             <el-option
               :label="c1.name"
@@ -21,6 +22,7 @@
             v-model="category.category2Id"
             placeholder="请选择"
             @change="handleSelectChange2"
+            :disabled="disabled"
           >
             <el-option
               :label="c2.name"
@@ -35,6 +37,7 @@
             v-model="category.category3Id"
             placeholder="请选择"
             @change="handleSelectChange3"
+            :disabled="disabled"
           >
             <el-option
               :label="c3.name"
@@ -52,6 +55,7 @@
 <script>
 export default {
   name: "Category",
+  props: ["disabled"],
   data() {
     return {
       category: {
@@ -74,7 +78,6 @@ export default {
       const res = await this.$API.attrs.getCategorys2(category1Id);
       if (res.code === 200) {
         this.category2List = res.data;
-        console.log(res);
       } else {
         this.$message.error(res.message);
       }
@@ -86,25 +89,17 @@ export default {
       const res = await this.$API.attrs.getCategorys3(category2Id);
       if (res.code === 200) {
         this.category3List = res.data;
-        console.log(res);
       } else {
         this.$message.error(res.message);
       }
     },
     //获取所有
     async handleSelectChange3(category3Id) {
-      const caregory = {
+      const category = {
         ...this.category,
         category3Id,
       };
-
-      const res = await this.$API.attrs.getAttrList(caregory);
-      if (res.code === 200) {
-        console.log(res.data);
-        this.$emit("change", res.data);
-      } else {
-        this.$message.error(res.message);
-      }
+      this.$emit("change", category);
     },
   },
   async mounted() {
