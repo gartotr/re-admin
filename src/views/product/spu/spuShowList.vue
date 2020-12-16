@@ -1,6 +1,8 @@
 <template>
   <el-card style="margin-top: 20px">
-    <el-button type="primary" icon="el-icon-plus">添加SPU</el-button>
+    <el-button type="primary" icon="el-icon-plus" :disabled="!category.category3Id" @click="add"
+      >添加SPU</el-button
+    >
     <el-table :data="spuList" border style="width: 100%; margin-top: 20px" v-loading="loading">
       <el-table-column label="序号" width="100" align="center" type="index"> </el-table-column>
       <el-table-column prop="spuName" label="SPU名称"> </el-table-column>
@@ -12,7 +14,7 @@
             type="primary"
             icon="el-icon-edit"
             size="mini"
-            @click="$emit('showUpdateList', row)"
+            @click="modify(row)"
           ></el-button>
           <el-button type="info" icon="el-icon-info" size="mini"></el-button>
           <el-button type="danger" icon="el-icon-delete" size="mini"></el-button>
@@ -52,6 +54,12 @@ export default {
     };
   },
   methods: {
+    modify(row) {
+      this.$emit("showUpdateList", row);
+    },
+    add() {
+      this.$emit("showUpdateList", { category3Id: this.category.category3Id });
+    },
     //获取分页信息
     async getPageList(page, limit) {
       this.loading = true;

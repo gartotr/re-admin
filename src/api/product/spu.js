@@ -3,13 +3,6 @@ import request from "@/utils/request";
 const api_name = "/admin/product";
 
 export default {
-  //销售属性 admin/product/baseSaleAttrList
-  getBaseSaleAttrList() {
-    return request({
-      url: `${api_name}/baseSaleAttrList`,
-      method: "GET"
-    });
-  },
   //删除SPU /admin/product/deleteSpu/{spuId}
   deleteSpu(spuId) {
     return request({

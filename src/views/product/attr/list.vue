@@ -129,6 +129,7 @@ export default {
     //设置显示隐藏input 的edit
     edit(row) {
       this.$set(row, "edit", true);
+      console.log(this.$refs);
       this.$nextTick(() => {
         this.$refs.input.focus();
       });
@@ -174,6 +175,10 @@ export default {
   mounted() {
     this.$bus.$on("change", this.getAttrList);
     this.$bus.$on("clearList", this.clearList);
+  },
+  beforeDestroy() {
+    this.$bus.$off("change", this.getAttrList);
+    this.$bus.$off("clearList", this.clearList);
   },
   components: {
     Category,
