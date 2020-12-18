@@ -63,10 +63,10 @@ export default {
       this.$emit("showSkuList", { ...row, ...this.category });
     },
     modify(row) {
-      this.$emit("showUpdateList", row);
+      this.$emit("showUpdateList", { ...row, ...this.category });
     },
     add() {
-      this.$emit("showUpdateList", { category3Id: this.category.category3Id });
+      this.$emit("showUpdateList", { ...this.category });
     },
     //获取分页信息
     async getPageList(page, limit) {

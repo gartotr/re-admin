@@ -1,16 +1,19 @@
 <template>
   <div>
-    <SkuList v-if="isShowSkuList" :spuItem="spuItem"></SkuList>
+    <SkuList v-if="isShowSkuList" :spuItem="spuItem" @showList="showList"></SkuList>
     <div v-else>
       <Category :disabled="!isShowList"></Category>
       <!-- 第一个 -->
-      <SpuShowList
-        v-if="isShowList"
-        @showUpdateList="showUpdateList"
-        @showSkuList="showSkuList"
-      ></SpuShowList>
-      <!-- 第二个 -->
-      <SpuUpdateList v-else :item="item" @showList="showList"></SpuUpdateList>
+
+      <transition name="el-fade-in">
+        <SpuShowList
+          v-if="isShowList"
+          @showUpdateList="showUpdateList"
+          @showSkuList="showSkuList"
+        ></SpuShowList>
+        <!-- 第二个 -->
+        <SpuUpdateList v-else :item="item" @showList="showList"></SpuUpdateList>
+      </transition>
     </div>
   </div>
 </template>
@@ -40,10 +43,11 @@ export default {
       this.item = { ...row };
       this.isShowList = false;
     },
-    showList(category3Id) {
+    showList(category) {
       this.isShowList = true;
+      this.isShowSkuList = false;
       this.$nextTick(() => {
-        this.$bus.$emit("change", { category3Id });
+        this.$bus.$emit("change", { ...category });
       });
     },
   },

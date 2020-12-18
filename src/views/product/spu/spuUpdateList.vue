@@ -149,7 +149,11 @@ export default {
   },
   methods: {
     changeShowList() {
-      this.$emit("showList", this.spu.category3Id);
+      this.$emit("showList", {
+        category1Id: this.spu.category1Id,
+        category2Id: this.spu.category2Id,
+        category3Id: this.spu.category3Id,
+      });
     },
     save() {
       this.$refs.spuForm.validate(async (value) => {
@@ -171,6 +175,7 @@ export default {
 
           if (result.code === 200) {
             this.$message.success("更新数据成功");
+            this.$bus.$on();
             this.$emit("showList", this.spu.category3Id);
           } else {
             this.$message.success("更新数据成功");
